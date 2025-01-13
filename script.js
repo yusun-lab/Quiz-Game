@@ -31,7 +31,7 @@ function loadQuestion() {
 
     if (currentQuestion.type === "multiple") {
         // Multiple choice questions
-        currentQuestion.incorrect_answers.push(currentQuestion.correct_answer); 
+        currentQuestion.incorrect_answers.push(currentQuestion.correct_answer);
         const shuffledOptions = shuffleArray(currentQuestion.incorrect_answers); 
 
         shuffledOptions.forEach((option) => {
@@ -63,11 +63,19 @@ function handleAnswer(button, isCorrect) {
         button.classList.add("correct");
     } else {
         button.classList.add("incorrect");
-        const correctButton = Array.from(optionsEl.children).find((btn) => btn.textContent === decodeHTML(questions[currentQuestionIndex].correct_answer)
+        const correctButton = Array.from(optionsEl.children).find(
+            (btn) => btn.textContent === decodeHTML(questions[currentQuestionIndex].correct_answer)
         );
         correctButton.classList.add("correct");
     }
     nextBtn.disabled = false;
+}
+
+// Disable all answer options
+function disableOptions() {
+    Array.from(optionsEl.children).forEach((btn) => {
+        btn.disabled = true;
+    }); 
 }
 
 // Reset state for next question
@@ -76,6 +84,50 @@ function resetState() {
     optionsEl.innerHTML = "";
 }
 
+// Update progress bar and score
+function updateProgress() {
+    questionCounterEl.textContent = `Question: ${currentQuestionIndex + 1}/${questions.length}`;
+    scoreEl.textContent = `Score: ${score}`;
+}
 
+// Shuffle array
+function shuffleArray(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
 
+// Decode HTML entities
+function decodeHTML(html) {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+}
+
+// Next question
+nextBtn.addEventListener("click", () => {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+        loadQuestion();
+    } else {
+        showResults();
+    }
+});
+
+// Restart quiz
+restartBtn.addEventListener("click", () => {
+    currentQuestionIndex = 0;
+    score = 0;
+    restartBtn.style.display = "none";
+    nextBtn.style.display = "inline-block";
+    fetchQuestions();
+})
+
+// Show results
+function showResults() {
+    questionEl.textContent = `Quiz Over! You scored ${score} out of ${questions.length}`;
+    optionsEl.innerHTML = "";
+    nextBtn.style.display = "none";
+    restartBtn.style.display = "inline-block";
+}
+
+// Initialize quiz
 fetchQuestions();
