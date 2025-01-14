@@ -7,8 +7,8 @@
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background: linear-gradient(135deg, #6a11cb, #2575fc);
-    color: #333;
+    background: linear-gradient(135deg, #6a11cb, #2575fc 100%);
+    color: #fff;
     margin: 0;
     display: flex;
     justify-content: center;
@@ -18,18 +18,30 @@ body {
 }
 
 #quiz-container {
+    background: #2d2d2d;
     width: 90%;
     max-width: 600px;
-    background: #fff;
     padding: 20px 30px;
     border-radius: 10px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     text-align: center;
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(0);
+    }
 }
 
 header h1 {
     font-size: 2rem;
-    color: #333;
+    color: white;
     margin-bottom: 10px;
 }
 
@@ -43,26 +55,25 @@ header h1 {
 }
 
 #progress span {
-    color: #2575fc;
+    color: #28a745;
 }
 
 #question-area h2 {
     font-size: 1.5rem;
     margin-bottom: 20px;
-    color: #555;
 }
 
 #options {
     display: flex;
     flex-direction: column;
-    gap: 15px;;
+    gap: 15px;
 }
 
-/* button {
+button {
     padding: 15px;
     font-size: 1rem;
-    background: #f0f0f0;
-    color: #333;
+    background: #333;
+    color: #f0f0f0;
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -75,18 +86,18 @@ button:hover {
 }
 
 button:disabled {
-    background: #e0e0e0;
     cursor: not-allowed;
-} */
+    opacity: 0.6;
+}
 
 .correct {
-    background-color: #28a745;
-    color: #fff;
+    background-color: #28a745 !important;
+    color: #fff !important;
 }
 
 .incorrect {
-    background-color: #dc3545;
-    color: #fff;
+    background-color: #dc3545 !important;
+    color: #fff !important;
 }
 
 footer {
@@ -97,7 +108,7 @@ footer {
 #restart-btn {
     padding: 12px 20px;
     font-size: 1rem;
-    background: #2575fc;
+    background: #2196f3;
     color: white;
     border: none;
     border-radius: 8px;
@@ -107,10 +118,31 @@ footer {
 
 #next-btn:hover,
 #restart-btn:hover {
-    background: #6a11cb;
+    background: #1e88e5;
 }
 
 #next-btn:disabled {
-    background: #a6d1ff;
+    background: #555;
     cursor: not-allowed;
+}
+
+/* Add some spacing for mobile */
+@media (max-width: 600px) {
+    #quiz-container {
+        padding: 15px, 20px;
+    }
+
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    #options button {
+        font-size: 0.9rem;
+    }
+
+    #next-btn,
+    #restart-btn {
+        font-size: 0.9rem;
+        padding: 10px 15px;
+    }
 }
