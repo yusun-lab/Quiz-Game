@@ -13,120 +13,124 @@ const scoreEl = document.getElementById("score");
 
 // Fetch questions from API
 async function fetchQuestions() {
-    try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-        questions = data.results;
-        loadQuestion();
-    } catch (error) {
-        questionEl.textContent = "Error loading questions!";
+  try {
+    const response = await fetch(API_URL);
+    // handle response error
+    if (!response.ok) {
+      throw new Error("Failed to fetch questions");
     }
+    const data = await response.json();
+    questions = data.results;
+    loadQuestion();
+  } catch (error) {
+    questionEl.textContent = "Error loading questions!";
+    // console.error for debugging
+    console.error(`There was an error fetching the questions: ${error}`);
+  }
 }
 
 // Load current question
 function loadQuestion() {
-    resetState();
-    const currentQuestion = questions[currentQuestionIndex];
-    questionEl.textContent = decodeHTML(currentQuestion.question);
+  resetState();
+  // deconstruct current question object
+  const { question, type, incorrect_answers, correct_answer } =
+    questions[currentQuestionIndex];
+  questionEl.textContent = decodeHTML(question);
 
-    if (currentQuestion.type === "multiple") {
-        // Multiple choice questions
-        currentQuestion.incorrect_answers.push(currentQuestion.correct_answer);
-        const shuffledOptions = shuffleArray(currentQuestion.incorrect_answers); 
+  // check if question is multiple choice or true/false
+  const options =
+    type === "multiple"
+      ? shuffleArray([...incorrect_answers, correct_answer])
+      : ["True", "False"];
 
-        shuffledOptions.forEach((option) => {
-            const button = document.createElement("button");
-            button.textContent = decodeHTML(option);
-            button.classList.add("option");
-            button.addEventListener("click", () => handleAnswer(button,option === currentQuestion.correct_answer));
-            optionsEl.appendChild(button);
-        });
-    } else if (currentQuestion.type === "boolean") {
-        // True/False questions
-        ["True", "False"].forEach((option) => {
-            const button = document.createElement("button");
-            button.textContent = option;
-            button.classList.add("option");
-            button.addEventListener("click", () => handleAnswer(button, option === currentQuestion.correct_answer));
-            optionsEl.appendChild(button);
-        });
-    }
+  // create button for each option
+  options.forEach((option) => {
+    const button = document.createElement("button");
+    button.textContent = decodeHTML(option);
+    button.classList.add("option");
+    button.addEventListener("click", () =>
+      handleAnswer(button, option === correct_answer)
+    );
+    optionsEl.appendChild(button);
+  });
 
-    updateProgress();
+  updateProgress();
 }
 
 // Handle user answer
 function handleAnswer(button, isCorrect) {
-    disableOptions();
-    if (isCorrect) {
-        score++;
-        button.classList.add("correct");
-    } else {
-        button.classList.add("incorrect");
-        const correctButton = Array.from(optionsEl.children).find(
-            (btn) => btn.textContent === decodeHTML(questions[currentQuestionIndex].correct_answer)
-        );
-        correctButton.classList.add("correct");
-    }
-    nextBtn.disabled = false;
+  disableOptions();
+  // ternary operator is more concise
+  button.classList.add(isCorrect ? "correct" : "incorrect");
+  if (isCorrect) {
+    score++;
+  } else {
+    const correctButton = Array.from(optionsEl.children).find(
+      (btn) =>
+        btn.textContent ===
+        decodeHTML(questions[currentQuestionIndex].correct_answer)
+    );
+    correctButton.classList.add("correct");
+  }
+  nextBtn.disabled = false;
 }
 
 // Disable all answer options
 function disableOptions() {
-    Array.from(optionsEl.children).forEach((btn) => {
-        btn.disabled = true;
-    }); 
+  // refactor for readability
+  optionsEl.querySelectorAll("button").forEach((btn) => (btn.disabled = true));
 }
 
 // Reset state for next question
 function resetState() {
-    nextBtn.disabled = true;
-    optionsEl.innerHTML = "";
+  nextBtn.disabled = true;
+  // textContent is better than innerHTML for security reasons
+  optionsEl.textContent = "";
 }
 
 // Update progress bar and score
 function updateProgress() {
-    questionCounterEl.textContent = `Question: ${currentQuestionIndex + 1}/${questions.length}`;
-    scoreEl.textContent = `Score: ${score}`;
+  questionCounterEl.textContent = `Question: ${currentQuestionIndex + 1}/${
+    questions.length
+  }`;
+  scoreEl.textContent = `Score: ${score}`;
 }
 
 // Shuffle array
 function shuffleArray(array) {
-    return array.sort(() => Math.random() - 0.5);
+  return array.sort(() => Math.random() - 0.5);
 }
 
 // Decode HTML entities
 function decodeHTML(html) {
-    const txt = document.createElement("textarea");
-    txt.innerHTML = html;
-    return txt.value;
+  const txt = document.createElement("textarea");
+  txt.innerHTML = html;
+  return txt.value;
 }
 
 // Next question
 nextBtn.addEventListener("click", () => {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
-        loadQuestion();
-    } else {
-        showResults();
-    }
+  currentQuestionIndex++;
+  // ternary operator is more concise
+  currentQuestionIndex < questions.length ? loadQuestion() : showResults();
 });
 
 // Restart quiz
 restartBtn.addEventListener("click", () => {
-    currentQuestionIndex = 0;
-    score = 0;
-    restartBtn.style.display = "none";
-    nextBtn.style.display = "inline-block";
-    fetchQuestions();
-})
+  currentQuestionIndex = 0;
+  score = 0;
+  restartBtn.style.display = "none";
+  nextBtn.style.display = "inline-block";
+  fetchQuestions();
+});
 
 // Show results
 function showResults() {
-    questionEl.textContent = `Quiz Over! You scored ${score} out of ${questions.length}`;
-    optionsEl.innerHTML = "";
-    nextBtn.style.display = "none";
-    restartBtn.style.display = "inline-block";
+  questionEl.textContent = `Quiz Over! You scored ${score} out of ${questions.length}`;
+  // textContent is better than innerHTML for security reasons
+  optionsEl.textContent = "";
+  nextBtn.style.display = "none";
+  restartBtn.style.display = "inline-block";
 }
 
 // Initialize quiz
